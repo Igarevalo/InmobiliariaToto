@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  USER
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  
+  // Relaciones
+  agentProperties Property[]    @relation("AgentProperties")
+  managedClients  Client[]      @relation("AgentClients")
+  interactions    Interaction[] // Interacciones realizadas por este agente
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum ClientType {
+  BUYER
+  TENANT
+  OWNER
+  LEAD
+}
+
+enum ClientStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+}
+
+model Client {
+  id        String       @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  type      ClientType   @default(LEAD)
+  status    ClientStatus @default(NEW)
+  notes     String?      @db.Text
+  
+  agentId   String?
+  agent     User?        @relation("AgentClients", fields: [agentId], references: [id])
+  
+  propertiesOwned Property[]        @relation("OwnerProperties")
+  interactions    Interaction[]
+  financials      FinancialRecord[]
+  inquiries       Inquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([agentId])
+  @@index([email])
+}
+
+model Interaction {
+  id        String   @id @default(uuid())
+  clientId  String
+  agentId   String
+  type      String   // Ej: CALL, EMAIL, MEETING, VIEWING
+  notes     String   @db.Text
+  date      DateTime @default(now())
+  
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  agent     User     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([agentId])
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  LAND
+  COMMERCIAL
+  OFFICE
+}
+
+enum OperationType {
+  SALE
+  RENT
+  TEMP_RENT
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  RENTED
+  INACTIVE
+}
+
+model Property {
+  id          String         @id @default(uuid())
+  title       String
+  slug        String         @unique
+  description String         @db.Text
+  type        PropertyType
+  operation   OperationType
+  status      PropertyStatus @default(AVAILABLE)
+  
+  price       Decimal        @db.Decimal(12, 2)
+  currency    String         @default("USD")
+  expenses    Decimal?       @db.Decimal(12, 2) // Expensas
+  
+  // Ubicación
+  address     String
+  city        String
+  province    String
+  zipCode     String?
+  latitude    Float?
+  longitude   Float?
+  
+  // Características
+  bedrooms    Int?
+  bathrooms   Int?
+  totalArea   Float?         // m²
+  coveredArea Float?         // m²
+  yearBuilt   Int?
+  
+  // Relaciones
+  agentId     String?
+  agent       User?          @relation("AgentProperties", fields: [agentId], references: [id])
+  
+  ownerId     String?
+  owner       Client?        @relation("OwnerProperties", fields: [ownerId], references: [id])
+  
+  images      PropertyImage[]
+  amenities   PropertyAmenity[]
+  financials  FinancialRecord[]
+  inquiries   Inquiry[]
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  @@index([status])
+  @@index([type])
+  @@index([operation])
+  @@index([city, province])
+  @@index([price])
+  @@index([agentId])
+  @@index([ownerId])
+}
+
+model PropertyImage {
+  id          String   @id @default(uuid())
+  url         String
+  blurDataUrl String?  @db.Text
+  alt         String?
+  order       Int      @default(0)
+  
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  @@index([propertyId])
+}
+
+model Amenity {
+  id          String            @id @default(uuid())
+  name        String            @unique
+  icon        String?
+  properties  PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  propertyId String
+  amenityId  String
+  
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  
+  @@id([propertyId, amenityId])
+}
+
+model Inquiry {
+  id         String   @id @default(uuid())
+  message    String   @db.Text
+  
+  clientId   String?
+  client     Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([propertyId])
+  @@index([clientId])
+}
+
+enum FinancialRecordType {
+  SALE
+  RENT
+  RESERVATION
+  COMMISSION
+  EXPENSE
+}
+
+model FinancialRecord {
+  id          String              @id @default(uuid())
+  type        FinancialRecordType
+  amount      Decimal             @db.Decimal(12, 2)
+  currency    String              @default("USD")
+  date        DateTime            @default(now())
+  notes       String?             @db.Text
+  
+  propertyId  String?
+  property    Property?           @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  
+  clientId    String?
+  client      Client?             @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  @@index([propertyId])
+  @@index([clientId])
+  @@index([type])
+}

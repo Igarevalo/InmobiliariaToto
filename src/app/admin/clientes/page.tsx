@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Search, Mail, Phone, Edit, MoreVertical } from "lucide-react";
+import { Plus, Search, Mail, Phone, Edit, MoreVertical, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function AdminClientesPage() {

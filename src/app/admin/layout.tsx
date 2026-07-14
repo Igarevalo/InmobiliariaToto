@@ -1,16 +1,25 @@
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { User } from "lucide-react";
+import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
+import { AdminHeaderProfile } from "@/components/admin/AdminHeaderProfile";
+import { cookies } from "next/headers";
 
 export const metadata = {
   title: "Admin Dashboard | InmobiliariaToto",
   description: "Panel de administración y CRM",
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const isAuthenticated = cookieStore.get("admin_session")?.value === "authenticated";
+
+  if (!isAuthenticated) {
+    return <AdminLoginForm />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <AdminSidebar />
@@ -22,15 +31,7 @@ export default function AdminLayout({
           <h2 className="font-semibold text-slate-800">Panel de Control</h2>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-slate-700">Juan Pérez</p>
-                <p className="text-xs text-slate-500">Administrador</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600">
-                <User size={20} />
-              </div>
-            </div>
+            <AdminHeaderProfile />
           </div>
         </header>
 

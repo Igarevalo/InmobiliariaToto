@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
@@ -24,10 +25,16 @@ export default function PropiedadesPage() {
       </div>
       
       <main className="flex-1 container mx-auto px-4 md:px-6 -mt-12 mb-20 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <PropertyFilters />
-          <PropertyGrid />
-        </div>
+        <Suspense fallback={
+          <div className="w-full flex items-center justify-center p-12 text-slate-500 font-medium">
+            Cargando propiedades...
+          </div>
+        }>
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <PropertyFilters />
+            <PropertyGrid />
+          </div>
+        </Suspense>
       </main>
       
       <Footer />

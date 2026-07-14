@@ -16,6 +16,19 @@ export function AdminSidebar() {
     { name: "Finanzas", href: "/admin/finanzas", icon: DollarSign },
   ];
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/admin/logout", {
+        method: "POST",
+      });
+      if (response.ok) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   return (
     <aside className="w-64 bg-[#1a202c] min-h-screen text-slate-300 flex flex-col fixed left-0 top-0">
       {/* Brand */}
@@ -58,7 +71,8 @@ export function AdminSidebar() {
           Configuración
         </Link>
         <button
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm hover:bg-red-500/10 hover:text-red-400 text-slate-300"
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm hover:bg-red-500/10 hover:text-red-400 text-slate-300 cursor-pointer text-left"
         >
           <LogOut size={18} className="text-slate-400" />
           Cerrar Sesión

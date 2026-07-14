@@ -50,9 +50,11 @@ export function Header() {
             <Link href="/contacto" className={cn("font-medium transition-colors hover:text-[#d69e2e]", isScrolled ? "text-slate-700" : "text-white/90")}>
               Contacto
             </Link>
-            <Button variant={isScrolled ? "primary" : "secondary"}>
-              Publicar Propiedad
-            </Button>
+            <Link href="/publicar">
+              <Button variant={isScrolled ? "primary" : "secondary"}>
+                Publicar Propiedad
+              </Button>
+            </Link>
           </nav>
 
           {/* Mobile Menu Toggle */}
@@ -72,16 +74,18 @@ export function Header() {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-slate-100 py-4 px-4 flex flex-col gap-4">
-          <Link href="/propiedades" className="text-slate-700 font-medium py-2 border-b border-slate-50">
+          <Link href="/propiedades" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">
             Propiedades
           </Link>
-          <Link href="/nosotros" className="text-slate-700 font-medium py-2 border-b border-slate-50">
+          <Link href="/nosotros" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">
             Nosotros
           </Link>
-          <Link href="/contacto" className="text-slate-700 font-medium py-2 border-b border-slate-50">
+          <Link href="/contacto" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">
             Contacto
           </Link>
-          <Button className="w-full mt-2">Publicar Propiedad</Button>
+          <Link href="/publicar" onClick={() => setMobileMenuOpen(false)}>
+            <Button className="w-full mt-2">Publicar Propiedad</Button>
+          </Link>
         </div>
       )}
     </header>

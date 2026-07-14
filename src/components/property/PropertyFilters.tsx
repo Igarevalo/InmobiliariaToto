@@ -1,10 +1,27 @@
 "use client";
 
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useFilterStore } from "@/stores/filterStore";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
 
 export function PropertyFilters() {
-  const { operation, type, minPrice, maxPrice, bedrooms, setFilter, resetFilters } = useFilterStore();
+  const { operation, type, minPrice, maxPrice, bedrooms, city, setFilter, resetFilters } = useFilterStore();
+  const searchParams = useSearchParams();
+
+  // Sincronizar parámetros de la URL con el store de filtros
+  useEffect(() => {
+    const op = searchParams.get("operation");
+    const ct = searchParams.get("city");
+    const ty = searchParams.get("type");
+    const mx = searchParams.get("maxPrice");
+
+    if (op !== null) setFilter("operation", op);
+    if (ct !== null) setFilter("city", ct);
+    if (ty !== null) setFilter("type", ty);
+    if (mx !== null) setFilter("maxPrice", mx ? Number(mx) : null);
+  }, [searchParams, setFilter]);
 
   return (
     <aside className="w-full lg:w-72 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 self-start sticky top-24">
@@ -19,6 +36,18 @@ export function PropertyFilters() {
       </div>
 
       <div className="space-y-6">
+        {/* Ubicación */}
+        <div>
+          <h4 className="text-sm font-semibold text-slate-700 mb-3">Ubicación</h4>
+          <input 
+            type="text" 
+            placeholder="Ciudad, barrio o zona..." 
+            value={city || ''}
+            onChange={(e) => setFilter('city', e.target.value)}
+            className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1a365d] text-slate-800"
+          />
+        </div>
+
         {/* Operación */}
         <div>
           <h4 className="text-sm font-semibold text-slate-700 mb-3">Operación</h4>
@@ -41,17 +70,19 @@ export function PropertyFilters() {
         {/* Tipo */}
         <div>
           <h4 className="text-sm font-semibold text-slate-700 mb-3">Tipo de Propiedad</h4>
-          <select 
+          <Select 
             value={type}
-            onChange={(e) => setFilter('type', e.target.value)}
-            className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1a365d]"
-          >
-            <option value="">Todos los tipos</option>
-            <option value="HOUSE">Casa</option>
-            <option value="APARTMENT">Departamento</option>
-            <option value="COMMERCIAL">Local Comercial</option>
-            <option value="LAND">Terreno</option>
-          </select>
+            onChange={(val) => setFilter('type', val)}
+            options={[
+              { value: "", label: "Todos los tipos" },
+              { value: "HOUSE", label: "Casa" },
+              { value: "APARTMENT", label: "Departamento" },
+              { value: "COMMERCIAL", label: "Local Comercial" },
+              { value: "LAND", label: "Terreno" },
+            ]}
+            placeholder="Todos los tipos"
+            className="h-10 text-sm bg-slate-50 border border-slate-200 focus:ring-1 focus:ring-[#1a365d]"
+          />
         </div>
 
         {/* Habitaciones */}

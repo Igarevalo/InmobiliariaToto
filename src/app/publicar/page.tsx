@@ -22,8 +22,8 @@ export default function PublicarPage() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("General");
+  const [province, setProvince] = useState("General");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [area, setArea] = useState("");
@@ -41,9 +41,7 @@ export default function PublicarPage() {
       if (!propertyType) tempErrors.propertyType = "El tipo de propiedad es obligatorio.";
       if (!price.trim()) tempErrors.price = "El precio es obligatorio.";
     } else if (currentStep === 2) {
-      if (!address.trim()) tempErrors.address = "La dirección es obligatoria.";
-      if (!city.trim()) tempErrors.city = "La ciudad es obligatoria.";
-      if (!province.trim()) tempErrors.province = "La provincia es obligatoria.";
+      if (!address.trim()) tempErrors.address = "La dirección aproximada o zona es obligatoria.";
     } else if (currentStep === 3) {
       if (!area.trim()) tempErrors.area = "La superficie es obligatoria.";
     }
@@ -136,8 +134,8 @@ export default function PublicarPage() {
                   setTitle("");
                   setPrice("");
                   setAddress("");
-                  setCity("");
-                  setProvince("");
+                  setCity("General");
+                  setProvince("General");
                   setBedrooms("");
                   setBathrooms("");
                   setArea("");
@@ -154,12 +152,12 @@ export default function PublicarPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Indicador de Pasos */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
-                {[1, 2, 3, 4].map((num) => (
+                {[1, 2, 3].map((num) => (
                   <div key={num} className="flex items-center flex-1 last:flex-none">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${step >= num ? 'bg-[#1a365d] text-white shadow-sm' : 'bg-slate-100 text-slate-400'}`}>
                       {num}
                     </div>
-                    {num < 4 && (
+                    {num < 3 && (
                       <div className={`h-1 flex-1 mx-2 rounded transition-all ${step > num ? 'bg-[#1a365d]' : 'bg-slate-100'}`} />
                     )}
                   </div>
@@ -252,43 +250,16 @@ export default function PublicarPage() {
                   </h3>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-600">Dirección y Altura</label>
+                    <label className="text-xs font-semibold text-slate-600">Zona / Ubicación Aproximada</label>
                     <input
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Ej. Av. del Libertador 1500"
+                      placeholder="Ej. Zona Centro, a 2 cuadras de la plaza principal"
                       className={`w-full h-11 px-3.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a365d] transition-all text-slate-800 placeholder:text-slate-400 ${errors.address ? 'border-red-400 focus:ring-red-400' : 'border-slate-200 focus:border-[#1a365d]'}`}
                     />
+                    <p className="text-xs text-slate-400">Por razones de seguridad y privacidad, no está permitido ingresar la dirección exacta del inmueble.</p>
                     {errors.address && <p className="text-xs text-red-500 mt-0.5">{errors.address}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Ciudad */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-600">Ciudad o Barrio</label>
-                      <input
-                        type="text"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="Ej. Recoleta"
-                        className={`w-full h-11 px-3.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a365d] transition-all text-slate-800 placeholder:text-slate-400 ${errors.city ? 'border-red-400 focus:ring-red-400' : 'border-slate-200 focus:border-[#1a365d]'}`}
-                      />
-                      {errors.city && <p className="text-xs text-red-500 mt-0.5">{errors.city}</p>}
-                    </div>
-
-                    {/* Provincia */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-600">Provincia</label>
-                      <input
-                        type="text"
-                        value={province}
-                        onChange={(e) => setProvince(e.target.value)}
-                        placeholder="Ej. Buenos Aires"
-                        className={`w-full h-11 px-3.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a365d] transition-all text-slate-800 placeholder:text-slate-400 ${errors.province ? 'border-red-400 focus:ring-red-400' : 'border-slate-200 focus:border-[#1a365d]'}`}
-                      />
-                      {errors.province && <p className="text-xs text-red-500 mt-0.5">{errors.province}</p>}
-                    </div>
                   </div>
                 </motion.div>
               )}
@@ -353,49 +324,6 @@ export default function PublicarPage() {
                   </div>
                 </motion.div>
               )}
-
-              {/* Paso 4: Carga de Archivos */}
-              {step === 4 && (
-                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                  <h3 className="text-xl font-bold text-[#1a365d] font-display flex items-center gap-2">
-                    <ImageIcon size={20} className="text-[#d69e2e]" />
-                    Galería de Fotos
-                  </h3>
-
-                  {/* Drag and Drop Container */}
-                  <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={simulateUpload}
-                    className={`border-2 border-dashed rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 transition-all cursor-pointer select-none ${isDragging ? 'border-[#1a365d] bg-[#1a365d]/5' : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'}`}
-                  >
-                    <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-center text-slate-400">
-                      <UploadCloud size={28} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-slate-800">Arrastra fotos aquí o haz clic para subir</p>
-                      <p className="text-xs text-slate-400">Formatos soportados: JPG, PNG. Mínimo 3 fotos recomendadas.</p>
-                    </div>
-                  </div>
-
-                  {/* Archivos cargados */}
-                  {uploadedFiles.length > 0 && (
-                    <div className="space-y-3">
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Archivos Cargados</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {uploadedFiles.map((fileName, idx) => (
-                          <div key={idx} className="p-3 border border-slate-100 rounded-xl bg-white flex items-center gap-2 shadow-sm">
-                            <ImageIcon size={16} className="text-[#d69e2e] shrink-0" />
-                            <span className="text-xs text-slate-600 truncate font-semibold">{fileName}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-
               {/* Botones de Navegación */}
               <div className="flex gap-3 pt-6 border-t border-slate-100">
                 {step > 1 && (
@@ -409,7 +337,7 @@ export default function PublicarPage() {
                     Atrás
                   </Button>
                 )}
-                {step < 4 ? (
+                {step < 3 ? (
                   <Button
                     type="button"
                     onClick={handleNext}

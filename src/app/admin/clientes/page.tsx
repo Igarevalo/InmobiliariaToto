@@ -89,44 +89,56 @@ export default function AdminClientesPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {CLIENTS.map((client) => (
-                <tr key={client.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={client.id} className="hover:bg-slate-50 transition-colors cursor-pointer group">
                   <td className="px-6 py-4">
-                    <p className="font-semibold text-slate-800">{client.name}</p>
-                    <p className="text-xs text-slate-500 font-mono">{client.id}</p>
+                    <Link href={`/admin/clientes/${client.id}`} className="block">
+                      <p className="font-semibold text-slate-800 group-hover:text-[#d69e2e] transition-colors">{client.name}</p>
+                      <p className="text-xs text-slate-500 font-mono">{client.id}</p>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1 text-slate-600">
-                      {client.email && (
-                        <div className="flex items-center gap-1.5">
-                          <Mail size={14} className="text-slate-400" />
-                          <span className="text-xs">{client.email}</span>
-                        </div>
-                      )}
-                      {client.phone && client.phone !== "-" && (
-                        <div className="flex items-center gap-1.5">
-                          <Phone size={14} className="text-slate-400" />
-                          <span className="text-xs">{client.phone}</span>
-                        </div>
-                      )}
-                    </div>
+                    <Link href={`/admin/clientes/${client.id}`} className="block">
+                      <div className="flex flex-col gap-1 text-slate-600">
+                        {client.email && (
+                          <div className="flex items-center gap-1.5">
+                            <Mail size={14} className="text-slate-400" />
+                            <span className="text-xs">{client.email}</span>
+                          </div>
+                        )}
+                        {client.phone && client.phone !== "-" && (
+                          <div className="flex items-center gap-1.5">
+                            <Phone size={14} className="text-slate-400" />
+                            <span className="text-xs">{client.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
-                      {client.type}
-                    </span>
+                    <Link href={`/admin/clientes/${client.id}`} className="block">
+                      <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+                        {client.type}
+                      </span>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      client.status === 'Nuevo' ? 'bg-blue-50 text-blue-700' :
-                      client.status === 'Calificado' ? 'bg-indigo-50 text-indigo-700' :
-                      client.status === 'Propuesta' ? 'bg-amber-50 text-amber-700' :
-                      client.status === 'Ganado' ? 'bg-green-50 text-green-700' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>
-                      {client.status}
-                    </span>
+                    <Link href={`/admin/clientes/${client.id}`} className="block">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        client.status === 'Nuevo' ? 'bg-blue-50 text-blue-700' :
+                        client.status === 'Calificado' ? 'bg-indigo-50 text-indigo-700' :
+                        client.status === 'Propuesta' ? 'bg-amber-50 text-amber-700' :
+                        client.status === 'Ganado' ? 'bg-green-50 text-green-700' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>
+                        {client.status}
+                      </span>
+                    </Link>
                   </td>
-                  <td className="px-6 py-4 text-slate-500">{client.lastContact}</td>
+                  <td className="px-6 py-4 text-slate-500">
+                    <Link href={`/admin/clientes/${client.id}`} className="block">
+                      {client.lastContact}
+                    </Link>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button className="p-2 text-slate-400 hover:text-[#2b6cb0] hover:bg-blue-50 rounded-lg transition-colors" title="Añadir interacción">

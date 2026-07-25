@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building, LayoutDashboard, Home, Users, MessageSquare, LogOut, Settings, DollarSign } from "lucide-react";
+import { Building, LayoutDashboard, Home, Users, MessageSquare, LogOut, Settings, DollarSign, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function AdminSidebar() {
@@ -14,6 +14,7 @@ export function AdminSidebar() {
     { name: "Clientes (CRM)", href: "/admin/clientes", icon: Users },
     { name: "Leads", href: "/admin/leads", icon: MessageSquare },
     { name: "Finanzas", href: "/admin/finanzas", icon: DollarSign },
+    { name: "Calendario", href: "/admin/calendario", icon: Calendar },
   ];
 
   const handleLogout = async () => {

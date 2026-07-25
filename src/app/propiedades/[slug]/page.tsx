@@ -71,9 +71,7 @@ export default async function PropertyPage(
     },
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": property.address,
-      "addressLocality": property.city,
-      "addressRegion": property.province
+      "streetAddress": property.address
     }
   };
 
@@ -115,7 +113,7 @@ export default async function PropertyPage(
                   </h1>
                   <div className="flex items-center text-slate-500 text-sm">
                     <MapPin size={16} className="mr-1 shrink-0" />
-                    <span>{property.address}, {property.city}, {property.province}</span>
+                    <span>{property.address}</span>
                   </div>
                 </div>
                 <div className="text-3xl font-bold font-display text-[#1a365d]">

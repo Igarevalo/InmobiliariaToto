@@ -41,7 +41,7 @@ export function PropertyFilters() {
           <h4 className="text-sm font-semibold text-slate-700 mb-3">Ubicación</h4>
           <input 
             type="text" 
-            placeholder="Ciudad, barrio o zona..." 
+            placeholder="Zona o barrio..." 
             value={city || ''}
             onChange={(e) => setFilter('city', e.target.value)}
             className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1a365d] text-slate-800"

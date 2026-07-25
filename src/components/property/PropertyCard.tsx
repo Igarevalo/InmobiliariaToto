@@ -9,8 +9,7 @@ interface PropertyCardProps {
     price: number;
     currency: string;
     operation: "SALE" | "RENT" | "TEMP_RENT";
-    city: string;
-    province: string;
+    address: string;
     bedrooms: number;
     bathrooms: number;
     totalArea: number;
@@ -55,7 +54,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         </Link>
         <div className="flex items-center text-slate-500 text-sm mb-4">
           <MapPin size={16} className="mr-1 shrink-0" />
-          <span className="truncate">{property.city}, {property.province}</span>
+          <span className="truncate">{property.address}</span>
         </div>
 
         {/* Features Footer */}

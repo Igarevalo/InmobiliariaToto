@@ -15,9 +15,9 @@ export const PropertySchema = z.object({
   price: z.coerce.number().positive("El precio debe ser mayor a 0"),
   currency: z.string().default("USD"),
   
-  address: z.string().min(5, "La dirección es obligatoria"),
-  city: z.string().min(2, "La ciudad es obligatoria"),
-  province: z.string().min(2, "La provincia es obligatoria"),
+  address: z.string().min(5, "La dirección o zona es obligatoria"),
+  city: z.string().default("General"),
+  province: z.string().default("General"),
   
   bedrooms: z.coerce.number().int().min(0).optional(),
   bathrooms: z.coerce.number().int().min(0).optional(),

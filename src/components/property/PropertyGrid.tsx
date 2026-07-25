@@ -15,8 +15,7 @@ const MOCK_PROPERTIES = [
     currency: "USD",
     operation: "SALE" as const,
     type: "HOUSE",
-    city: "Capital Federal",
-    province: "Buenos Aires",
+    address: "Palermo Soho",
     bedrooms: 4,
     bathrooms: 3,
     totalArea: 400,
@@ -29,8 +28,7 @@ const MOCK_PROPERTIES = [
     currency: "USD",
     operation: "RENT" as const,
     type: "APARTMENT",
-    city: "Puerto Madero",
-    province: "Buenos Aires",
+    address: "Puerto Madero, Dique 3",
     bedrooms: 2,
     bathrooms: 2,
     totalArea: 120,
@@ -43,8 +41,7 @@ const MOCK_PROPERTIES = [
     currency: "USD",
     operation: "SALE" as const,
     type: "HOUSE",
-    city: "Pilar",
-    province: "Buenos Aires",
+    address: "Pilar, Zona Golf",
     bedrooms: 5,
     bathrooms: 4,
     totalArea: 800,
@@ -57,8 +54,7 @@ const MOCK_PROPERTIES = [
     currency: "USD",
     operation: "RENT" as const,
     type: "OFFICE",
-    city: "Microcentro",
-    province: "Buenos Aires",
+    address: "Microcentro, peatonal Florida",
     bedrooms: 0,
     bathrooms: 2,
     totalArea: 80,
@@ -107,10 +103,9 @@ export function PropertyGrid() {
     if (maxPrice && p.price > maxPrice) return false;
     if (city && city.trim() !== "") {
       const searchStr = city.toLowerCase().trim();
-      const matchCity = p.city?.toLowerCase().includes(searchStr);
-      const matchProvince = p.province?.toLowerCase().includes(searchStr);
+      const matchAddress = p.address?.toLowerCase().includes(searchStr);
       const matchTitle = p.title?.toLowerCase().includes(searchStr);
-      if (!matchCity && !matchProvince && !matchTitle) return false;
+      if (!matchAddress && !matchTitle) return false;
     }
     return true;
   });

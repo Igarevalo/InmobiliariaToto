@@ -60,34 +60,48 @@ export default function AdminPropertiesPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {PROPERTIES.map((prop) => (
-                <tr key={prop.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={prop.id} className="hover:bg-slate-50 transition-colors cursor-pointer group">
                   <td className="px-6 py-4">
-                    <p className="font-semibold text-slate-800 line-clamp-1">{prop.title}</p>
-                    <p className="text-xs text-slate-500 font-mono">ID: #{prop.id.toString().padStart(4, '0')}</p>
+                    <Link href={`/admin/propiedades/${prop.slug}`} className="block">
+                      <p className="font-semibold text-slate-800 line-clamp-1 group-hover:text-[#d69e2e] transition-colors">{prop.title}</p>
+                      <p className="text-xs text-slate-500 font-mono">ID: #{prop.id.toString().padStart(4, '0')}</p>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-slate-800">{prop.type}</p>
-                    <p className="text-xs text-slate-500">{prop.operation}</p>
+                    <Link href={`/admin/propiedades/${prop.slug}`} className="block">
+                      <p className="text-slate-800">{prop.type}</p>
+                      <p className="text-xs text-slate-500">{prop.operation}</p>
+                    </Link>
                   </td>
-                  <td className="px-6 py-4 font-medium text-slate-800">{prop.price}</td>
+                  <td className="px-6 py-4 font-medium text-slate-800">
+                    <Link href={`/admin/propiedades/${prop.slug}`} className="block">
+                      {prop.price}
+                    </Link>
+                  </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      prop.status === 'Activa' ? 'bg-green-50 text-green-700' :
-                      prop.status === 'Reservada' ? 'bg-amber-50 text-amber-700' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>
-                      {prop.status}
-                    </span>
+                    <Link href={`/admin/propiedades/${prop.slug}`} className="block">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        prop.status === 'Activa' ? 'bg-green-50 text-green-700' :
+                        prop.status === 'Reservada' ? 'bg-amber-50 text-amber-700' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>
+                        {prop.status}
+                      </span>
+                    </Link>
                   </td>
-                  <td className="px-6 py-4 text-slate-500">{prop.views}</td>
+                  <td className="px-6 py-4 text-slate-500">
+                    <Link href={`/admin/propiedades/${prop.slug}`} className="block">
+                      {prop.views}
+                    </Link>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`/propiedades/${prop.slug}`} target="_blank" className="p-2 text-slate-400 hover:text-[#2b6cb0] hover:bg-blue-50 rounded-lg transition-colors" title="Ver en la web">
                         <Eye size={18} />
                       </Link>
-                      <button className="p-2 text-slate-400 hover:text-[#d69e2e] hover:bg-yellow-50 rounded-lg transition-colors" title="Editar">
+                      <Link href={`/admin/propiedades/${prop.slug}`} className="p-2 text-slate-400 hover:text-[#d69e2e] hover:bg-yellow-50 rounded-lg transition-colors" title="Gestionar Contratos, Archivos y Eventos">
                         <Edit size={18} />
-                      </button>
+                      </Link>
                       <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
                         <Trash2 size={18} />
                       </button>

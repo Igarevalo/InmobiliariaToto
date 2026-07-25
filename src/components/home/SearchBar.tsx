@@ -72,7 +72,7 @@ export function SearchBar() {
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="Ciudad, barrio o zona..."
+            placeholder="Zona o barrio..."
             className="w-full h-12 pl-10 pr-4 rounded-xl border-none bg-white focus:ring-2 focus:ring-[#1a365d] text-slate-800"
           />
         </div>

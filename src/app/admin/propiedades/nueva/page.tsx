@@ -21,8 +21,8 @@ export default function NuevaPropiedadPage() {
     expenses: "",
     description: "",
     address: "",
-    city: "",
-    province: "",
+    city: "General",
+    province: "General",
     bedrooms: "",
     bathrooms: "",
     totalArea: "",
@@ -227,36 +227,17 @@ export default function NuevaPropiedadPage() {
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="text-lg font-bold text-[#1a365d] mb-6 border-b border-slate-100 pb-2">Ubicación</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-2">Calle y Número *</label>
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Zona / Dirección Aproximada *</label>
               <Input 
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Ej: Av. del Libertador 1234" 
+                placeholder="Ej: Zona Norte, a 3 cuadras de la estación" 
                 required
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Barrio / Localidad *</label>
-              <Input 
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="Ej: Palermo" 
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Provincia / Ciudad *</label>
-              <Input 
-                name="province"
-                value={formData.province}
-                onChange={handleChange}
-                placeholder="Ej: CABA" 
-                required
-              />
+              <p className="text-xs text-slate-400 mt-1">Por cuestiones de privacidad y seguridad, ingrese una ubicación general sin altura exacta.</p>
             </div>
           </div>
         </div>

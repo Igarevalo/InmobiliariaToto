@@ -145,7 +145,7 @@ export default function AdminPropertyDetailPage() {
   };
 
   const handleToggleFileStatus = (id: string) => {
-    const updatedFiles = files.map(f => {
+    const updatedFiles = files.map((f): AttachmentFile => {
       if (f.id === id) {
         return {
           ...f,

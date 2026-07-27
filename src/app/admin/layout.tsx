@@ -2,6 +2,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { AdminHeaderProfile } from "@/components/admin/AdminHeaderProfile";
 import { cookies } from "next/headers";
+import { verifySessionToken } from "@/lib/auth";
 
 export const metadata = {
   title: "Admin Dashboard | InmobiliariaToto",
@@ -14,7 +15,8 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const isAuthenticated = cookieStore.get("admin_session")?.value === "authenticated";
+  const token = cookieStore.get("admin_session")?.value;
+  const isAuthenticated = verifySessionToken(token);
 
   if (!isAuthenticated) {
     return <AdminLoginForm />;

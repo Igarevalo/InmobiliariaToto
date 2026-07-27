@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import fs from "fs";
 import path from "path";
+import { verifyPassword, generateSessionToken } from "@/lib/auth";
 
 const CONFIG_PATH = path.join(process.cwd(), "admin_config.json");
+const SESSION_DURATION = 60 * 60 * 4; // 4 horas en segundos
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,14 +31,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (password === correctPassword) {
+    // Comprobar la contraseña usando el helper seguro (soporta texto plano y scrypt)
+    if (verifyPassword(password, correctPassword)) {
       const cookieStore = await cookies();
-      cookieStore.set("admin_session", "authenticated", {
+      const sessionToken = generateSessionToken(SESSION_DURATION);
+
+      cookieStore.set("admin_session", sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 días
+        maxAge: SESSION_DURATION,
       });
 
       return NextResponse.json({ success: true });

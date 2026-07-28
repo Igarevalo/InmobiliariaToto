@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 // interfaces
 interface ClientProfile {
@@ -106,7 +107,17 @@ export default function AdminClientDetailPage() {
 
   const [showNotification, setShowNotification] = useState(false);
 
-  // --- Cargar de localStorage ---
+  // --- Cargar de localStorage y Query Params ---
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get("tab");
+      if (tabParam && ["info", "properties", "finances", "interactions"].includes(tabParam)) {
+        setActiveTab(tabParam as any);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedProfile = localStorage.getItem(`client_profile_${id}`);
@@ -452,18 +463,16 @@ export default function AdminClientDetailPage() {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-600 mb-1">Inicio Contrato</label>
-                        <Input 
-                          type="date"
+                        <DatePicker 
                           value={newPropStart} 
-                          onChange={(e) => setNewPropStart(e.target.value)} 
+                          onChange={(val) => setNewPropStart(val)} 
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-600 mb-1">Vencimiento</label>
-                        <Input 
-                          type="date"
+                        <DatePicker 
                           value={newPropEnd} 
-                          onChange={(e) => setNewPropEnd(e.target.value)} 
+                          onChange={(val) => setNewPropEnd(val)} 
                         />
                       </div>
                     </div>
@@ -587,10 +596,9 @@ export default function AdminClientDetailPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
-                  <Input 
-                    type="date"
+                  <DatePicker 
                     value={newFinDate} 
-                    onChange={(e) => setNewFinDate(e.target.value)} 
+                    onChange={(val) => setNewFinDate(val)} 
                     required 
                   />
                 </div>
@@ -670,10 +678,9 @@ export default function AdminClientDetailPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
-                  <Input 
-                    type="date"
+                  <DatePicker 
                     value={newIntDate} 
-                    onChange={(e) => setNewIntDate(e.target.value)} 
+                    onChange={(val) => setNewIntDate(val)} 
                     required 
                   />
                 </div>

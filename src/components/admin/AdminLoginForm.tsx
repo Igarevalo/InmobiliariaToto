@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, ShieldAlert, Building, Eye, EyeOff } from "lucide-react";
+import { KeyRound, ShieldAlert, Building, Eye, EyeOff, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useAdminStore } from "@/stores/adminStore";
 
 export function AdminLoginForm() {
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { setProfile } = useAdminStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,16 +27,20 @@ export function AdminLoginForm() {
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ usernameOrEmail, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // Guardar el perfil en Zustand
+        if (data.user) {
+          setProfile(data.user.name, data.user.email, data.user.avatar || "");
+        }
         // Recargar la página para activar la validación en el Server Component del Layout
         window.location.reload();
       } else {
-        setError(data.error || "Contraseña incorrecta.");
+        setError(data.error || "Usuario o contraseña incorrectos.");
       }
     } catch (err) {
       setError("Error de red. Intente de nuevo más tarde.");
@@ -57,6 +64,24 @@ export function AdminLoginForm() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Usuario / Email */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-600">Usuario o Correo Electrónico</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                <User size={18} />
+              </div>
+              <input
+                type="text"
+                value={usernameOrEmail}
+                onChange={(e) => setUsernameOrEmail(e.target.value)}
+                placeholder="Ej. marta o marta@inmobiliariatoto.com"
+                className={`w-full h-11 pl-10 pr-3 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a365d] transition-all text-slate-800 placeholder:text-slate-400 ${error ? 'border-red-400 focus:ring-red-400' : 'border-slate-200 focus:border-[#1a365d]'}`}
+              />
+            </div>
+          </div>
+
+          {/* Contraseña */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-600">Contraseña de Acceso</label>
             <div className="relative">

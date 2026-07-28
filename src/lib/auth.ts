@@ -38,11 +38,11 @@ export function verifyPassword(password: string, storedHash: string): boolean {
 
 /**
  * Generate a signed session token.
- * Contains a payload with role and expiration, and an HMAC signature.
+ * Contains a payload with role, expiration, optional user details, and an HMAC signature.
  */
-export function generateSessionToken(expiresInSeconds: number): string {
+export function generateSessionToken(expiresInSeconds: number, userDetails?: { name: string; email: string; username: string; avatar?: string }): string {
   const expiresAt = Date.now() + expiresInSeconds * 1000;
-  const payload = JSON.stringify({ role: "admin", expiresAt });
+  const payload = JSON.stringify({ role: "admin", expiresAt, user: userDetails });
   
   const payloadBase64 = Buffer.from(payload).toString("base64");
   const hmac = crypto.createHmac("sha256", JWT_SECRET);
@@ -57,10 +57,18 @@ export function generateSessionToken(expiresInSeconds: number): string {
  * Validates the HMAC signature and checks if the token has expired.
  */
 export function verifySessionToken(token: string | undefined): boolean {
-  if (!token) return false;
+  return getSessionPayload(token) !== null;
+}
+
+/**
+ * Extract and verify session payload.
+ * Returns the decoded payload if valid, otherwise null.
+ */
+export function getSessionPayload(token: string | undefined): any | null {
+  if (!token) return null;
   
   const parts = token.split(".");
-  if (parts.length !== 2) return false;
+  if (parts.length !== 2) return null;
   
   const [payloadBase64, signature] = parts;
   
@@ -75,18 +83,18 @@ export function verifySessionToken(token: string | undefined): boolean {
       Buffer.from(expectedSignature, "hex")
     );
     
-    if (!isSignatureValid) return false;
+    if (!isSignatureValid) return null;
 
     // Decode and parse payload
     const payloadStr = Buffer.from(payloadBase64, "base64").toString("utf8");
     const payload = JSON.parse(payloadStr);
     
     // Check role and expiration
-    if (payload.role !== "admin") return false;
-    if (!payload.expiresAt || payload.expiresAt < Date.now()) return false;
+    if (payload.role !== "admin") return null;
+    if (!payload.expiresAt || payload.expiresAt < Date.now()) return null;
     
-    return true;
+    return payload;
   } catch (e) {
-    return false;
+    return null;
   }
 }

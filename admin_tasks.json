@@ -1,0 +1,24 @@
+[
+  {
+    "id": "341aaff0-a64f-4d61-a3d5-74a565d7d3ad",
+    "title": "Revisar el estado de alquiler de Pepe",
+    "description": "Revisalo",
+    "status": "IN_PROGRESS",
+    "priority": "MEDIUM",
+    "assignedTo": "marta",
+    "createdBy": "admin",
+    "dueDate": "2026-07-29",
+    "completedAt": null,
+    "comments": [
+      {
+        "id": "d6066ebe-da31-40a8-afb4-bf1f79aab259",
+        "author": "marta",
+        "authorName": "Marta",
+        "content": "hola",
+        "createdAt": "2026-07-28T01:09:17.341Z"
+      }
+    ],
+    "createdAt": "2026-07-28T01:07:53.371Z",
+    "updatedAt": "2026-07-28T01:16:16.227Z"
+  }
+]

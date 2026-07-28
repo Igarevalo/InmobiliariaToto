@@ -1,0 +1,16 @@
+[
+  {
+    "username": "admin",
+    "name": "Juan Pérez",
+    "email": "juan.perez@inmobiliariatoto.com",
+    "password": "81a974adfed23f98be8cb56f074069d0:3b78a32aa385465d371d7faab4b7c45b88d58770adacff98685928c61901b785d70cd03d18997615da8cca66d9a0ef61e7e9d81e362ad4c11b52487bf9644831",
+    "avatar": ""
+  },
+  {
+    "username": "marta",
+    "name": "Marta",
+    "email": "marta@inmobiliariatoto.com",
+    "password": "3b8a0a9bb43e63c477d6b8b3a525cc45:592f7d7ee1149bca2e050f83d84e72970c28b89307d2b2986483980ce280712f3818277037e1a1a874a3f7d3348096de500d82a5a5453e342788196e6842233b",
+    "avatar": ""
+  }
+]

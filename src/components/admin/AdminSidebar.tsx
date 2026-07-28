@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building, LayoutDashboard, Home, Users, MessageSquare, LogOut, Settings, DollarSign, Calendar } from "lucide-react";
+import { Building, LayoutDashboard, Home, Users, MessageSquare, LogOut, Settings, DollarSign, Calendar, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function AdminSidebar() {
@@ -13,6 +13,7 @@ export function AdminSidebar() {
     { name: "Propiedades", href: "/admin/propiedades", icon: Home },
     { name: "Clientes (CRM)", href: "/admin/clientes", icon: Users },
     { name: "Leads", href: "/admin/leads", icon: MessageSquare },
+    { name: "Tareas", href: "/admin/tareas", icon: ClipboardList },
     { name: "Finanzas", href: "/admin/finanzas", icon: DollarSign },
     { name: "Calendario", href: "/admin/calendario", icon: Calendar },
   ];

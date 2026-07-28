@@ -236,3 +236,43 @@ model FinancialRecord {
   @@index([clientId])
   @@index([type])
 }
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  POSTPONED
+  SUSPENDED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model AdminTask {
+  id          String        @id @default(uuid())
+  title       String
+  description String?       @db.Text
+  status      TaskStatus    @default(PENDING)
+  priority    TaskPriority  @default(MEDIUM)
+  assignedTo  String        // 'admin' o 'marta'
+  createdBy   String        // 'admin' o 'marta'
+  dueDate     DateTime?
+  completedAt DateTime?
+  comments    TaskComment[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model TaskComment {
+  id        String    @id @default(uuid())
+  taskId    String
+  task      AdminTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author    String    // 'admin' o 'marta'
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+
+  @@index([taskId])
+}

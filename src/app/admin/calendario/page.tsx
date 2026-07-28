@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, Clock, Plus, Trash2, Home, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+
+const PROPERTIES = [
+  { slug: "casa-moderna-en-palermo", title: "Casa Moderna con Jardín en Palermo" },
+  { slug: "departamento-puerto-madero", title: "Lujoso Departamento con Vista al Río" },
+  { slug: "oficina-microcentro", title: "Oficina Moderna en Microcentro" },
+];
 
 interface CalendarEvent {
   id: string;
@@ -170,10 +177,18 @@ export default function AdminCalendarPage() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Propiedad Asociada</label>
-                  <Input 
-                    value={newProperty} 
-                    onChange={(e) => setNewProperty(e.target.value)} 
-                    placeholder="Ej. Casa Palermo" 
+                  <Select
+                    value={PROPERTIES.find(p => p.title === newProperty)?.slug || ""}
+                    onChange={(val) => {
+                      const match = PROPERTIES.find(p => p.slug === val);
+                      setNewProperty(match ? match.title : "");
+                    }}
+                    className="h-11 text-sm"
+                    placeholder="Ninguna - Evento General"
+                    options={[
+                      { value: "", label: "Ninguna - Evento General" },
+                      ...PROPERTIES.map(p => ({ value: p.slug, label: p.title }))
+                    ]}
                   />
                 </div>
               </div>

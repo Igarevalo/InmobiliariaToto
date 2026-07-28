@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { 
   ArrowLeft, FileText, Calendar, Users, History, Plus, 
-  Trash2, Download, Save, CheckCircle, FilePlus, ClipboardList 
+  Trash2, Download, Save, CheckCircle, FilePlus, ClipboardList, Home, Image as ImageIcon, X
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { Select } from "@/components/ui/Select";
 
 // Interfaz para Tipos de Datos
 interface ContractData {
@@ -38,12 +40,32 @@ interface EventLog {
   description: string;
 }
 
+  interface PropertyDetails {
+    title: string;
+    price: string;
+    currency: string;
+    type: string;
+    operation: string;
+    status: string;
+    address: string;
+    city: string;
+    province: string;
+    bedrooms: number;
+    bathrooms: number;
+    totalArea: number;
+    coveredArea: number;
+    description: string;
+    image: string;
+    images?: string[];
+    barrio?: string;
+  }
+
 export default function AdminPropertyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
 
-  const [activeTab, setActiveTab] = useState<"contract" | "files" | "history">("contract");
+  const [activeTab, setActiveTab] = useState<"publication" | "contract" | "files" | "history">("publication");
 
   // --- Estados de Datos ---
   const [contract, setContract] = useState<ContractData>({
@@ -89,6 +111,27 @@ export default function AdminPropertyDetailPage() {
   });
 
   const [showNotification, setShowNotification] = useState(false);
+  const [newGalleryImage, setNewGalleryImage] = useState("");
+
+  const [propertyDetails, setPropertyDetails] = useState<PropertyDetails>({
+    title: "",
+    price: "",
+    currency: "USD",
+    type: "HOUSE",
+    operation: "SALE",
+    status: "AVAILABLE",
+    address: "",
+    city: "Pico Truncado",
+    province: "",
+    bedrooms: 0,
+    bathrooms: 0,
+    totalArea: 0,
+    coveredArea: 0,
+    description: "",
+    image: "",
+    images: [],
+    barrio: "Centro",
+  });
 
   // --- Cargar de localStorage si existe ---
   useEffect(() => {
@@ -96,10 +139,88 @@ export default function AdminPropertyDetailPage() {
       const storedContract = localStorage.getItem(`contract_${slug}`);
       const storedFiles = localStorage.getItem(`files_${slug}`);
       const storedHistory = localStorage.getItem(`history_${slug}`);
+      const storedDetails = localStorage.getItem(`property_details_${slug}`);
 
       if (storedContract) setContract(JSON.parse(storedContract));
       if (storedFiles) setFiles(JSON.parse(storedFiles));
       if (storedHistory) setHistory(JSON.parse(storedHistory));
+
+      if (storedDetails) {
+        setPropertyDetails(JSON.parse(storedDetails));
+      } else {
+        // Cargar mocks realistas
+        if (slug === "casa-moderna-en-palermo") {
+          setPropertyDetails({
+            title: "Casa Moderna con Jardín en Palermo",
+            price: "350000",
+            currency: "USD",
+            type: "HOUSE",
+            operation: "SALE",
+            status: "AVAILABLE",
+            address: "Calle Falsa 123",
+            city: "Pico Truncado",
+            province: "Santa Cruz",
+            bedrooms: 4,
+            bathrooms: 3,
+            totalArea: 400,
+            coveredArea: 250,
+            description: "Hermosa propiedad recién refaccionada con amplio jardín y piscina. Ideal para familias.",
+            image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+            images: [
+              "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
+            ],
+            barrio: "Residencial Oeste"
+          });
+        } else if (slug === "departamento-puerto-madero") {
+          setPropertyDetails({
+            title: "Lujoso Departamento con Vista al Río",
+            price: "2500",
+            currency: "USD",
+            type: "APARTMENT",
+            operation: "RENT",
+            status: "RESERVED",
+            address: "Av. Alicia Moreau de Justo 1500",
+            city: "Pico Truncado",
+            province: "Santa Cruz",
+            bedrooms: 2,
+            bathrooms: 2,
+            totalArea: 110,
+            coveredArea: 95,
+            description: "Exclusivo departamento en Puerto Madero. Vista panorámica al río, amenities de categoría, seguridad 24 horas y cochera doble.",
+            image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80",
+            images: [
+              "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
+            ],
+            barrio: "Parque Industrial"
+          });
+        } else {
+          setPropertyDetails({
+            title: "Oficina Moderna en Microcentro",
+            price: "1200",
+            currency: "USD",
+            type: "OFFICE",
+            operation: "RENT",
+            status: "INACTIVE",
+            address: "Florida 400",
+            city: "Pico Truncado",
+            province: "Santa Cruz",
+            bedrooms: 0,
+            bathrooms: 1,
+            totalArea: 80,
+            coveredArea: 80,
+            description: "Oficina corporativa en pleno centro financiero. Planta libre, excelente iluminación natural, seguridad y lista para ingresar.",
+            image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
+            images: [
+              "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80",
+            ],
+            barrio: "Centro"
+          });
+        }
+      }
     }
   }, [slug]);
 
@@ -113,6 +234,12 @@ export default function AdminPropertyDetailPage() {
   const handleSaveContract = (e: React.FormEvent) => {
     e.preventDefault();
     saveToLocalStorage(`contract_${slug}`, contract);
+    triggerNotification();
+  };
+
+  const handleSaveDetails = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveToLocalStorage(`property_details_${slug}`, propertyDetails);
     triggerNotification();
   };
 
@@ -218,18 +345,25 @@ export default function AdminPropertyDetailPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4">
         <Link href="/admin/propiedades" className="p-2 bg-white rounded-lg border border-slate-200 text-slate-500 hover:text-[#1a365d] transition-colors">
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-display">{propertyTitle}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-display">{propertyDetails.title || propertyTitle}</h1>
           <p className="text-sm text-slate-500">Gestión administrativa interna, contratos y registros históricos.</p>
         </div>
       </div>
 
       {/* Tabs Selector */}
       <div className="flex border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab("publication")}
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all ${activeTab === "publication" ? "border-[#1a365d] text-[#1a365d]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+        >
+          <Home size={18} />
+          Ficha de Publicación
+        </button>
         <button
           onClick={() => setActiveTab("contract")}
           className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all ${activeTab === "contract" ? "border-[#1a365d] text-[#1a365d]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
@@ -256,6 +390,304 @@ export default function AdminPropertyDetailPage() {
       {/* Tab Contents */}
       <div className="grid grid-cols-1 gap-6">
         
+        {/* PESTAÑA: FICHA DE PUBLICACIÓN */}
+        {activeTab === "publication" && (
+          <form onSubmit={handleSaveDetails} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Vista Previa y Foto (Izquierda) */}
+            <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col space-y-4">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vista Previa de Portada</span>
+              
+              {propertyDetails.image ? (
+                <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-slate-100 shadow-inner group">
+                  <img
+                    src={propertyDetails.image}
+                    alt={propertyDetails.title}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              ) : (
+                <div className="w-full aspect-video bg-slate-50 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 text-xs">
+                  <ImageIcon size={28} className="text-slate-300 mb-1" />
+                  Sin imagen de portada
+                </div>
+              )}
+
+              <div className="space-y-1.5 pb-3 border-b border-slate-100">
+                <label className="text-xs font-semibold text-slate-600 block">Imagen de Portada</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setPropertyDetails({ ...propertyDetails, image: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                    id="cover-photo-upload"
+                  />
+                  <label
+                    htmlFor="cover-photo-upload"
+                    className="w-full h-11 flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 transition-all cursor-pointer select-none"
+                  >
+                    <span>📁</span> Cargar Foto de Portada
+                  </label>
+                </div>
+              </div>
+
+              {/* Galería de Imágenes Adicionales */}
+              <div className="space-y-3">
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Galería de Imágenes</span>
+                
+                {/* Lista de Imágenes */}
+                <div className="grid grid-cols-3 gap-2">
+                  {(propertyDetails.images || []).map((imgUrl, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-100 group shadow-sm bg-slate-50">
+                      <img src={imgUrl} className="object-cover w-full h-full" alt={`Galería ${idx + 1}`} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedImages = (propertyDetails.images || []).filter((_, i) => i !== idx);
+                          setPropertyDetails({ ...propertyDetails, images: updatedImages });
+                        }}
+                        className="absolute top-1 right-1 p-1 bg-rose-500 hover:bg-rose-600 text-white rounded-md transition-colors shadow-md opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer"
+                        title="Eliminar imagen"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Formulario Agregar Imagen Local */}
+                <div className="space-y-1.5 pt-2">
+                  <label className="text-xs font-semibold text-slate-600 block">Subir Imagen a Galería</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const currentImages = propertyDetails.images || [];
+                            setPropertyDetails({
+                              ...propertyDetails,
+                              images: [...currentImages, reader.result as string]
+                            });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="hidden"
+                      id="gallery-photo-upload"
+                    />
+                    <label
+                      htmlFor="gallery-photo-upload"
+                      className="w-full h-11 flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 transition-all cursor-pointer select-none"
+                    >
+                      <span>➕</span> Cargar Imagen de mis Archivos
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulario de Detalles (Derecha) */}
+            <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
+              <h3 className="text-lg font-bold text-[#1a365d] border-b border-slate-100 pb-2">Información de la Publicación</h3>
+              
+              <div className="space-y-4">
+                {/* Título de la Publicación */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Título del Inmueble</label>
+                  <Input
+                    required
+                    value={propertyDetails.title || ""}
+                    onChange={(e) => setPropertyDetails({...propertyDetails, title: e.target.value})}
+                    placeholder="Ej. Casa Moderna con Jardín en Palermo"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Precio y Moneda */}
+                  <div className="space-y-1.5 col-span-2">
+                    <label className="text-xs font-semibold text-slate-600">Precio / Valor</label>
+                    <div className="flex gap-2">
+                      <div className="w-24 shrink-0">
+                        <Select
+                          value={propertyDetails.currency}
+                          onChange={(val) => setPropertyDetails({...propertyDetails, currency: val})}
+                          className="h-11 text-sm font-semibold"
+                          options={[
+                            { value: "USD", label: "USD" },
+                            { value: "ARS", label: "ARS" }
+                          ]}
+                        />
+                      </div>
+                      <Input
+                        type="number"
+                        required
+                        value={propertyDetails.price || ""}
+                        onChange={(e) => setPropertyDetails({...propertyDetails, price: e.target.value})}
+                        placeholder="Ej. 350000"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Estado */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Estado de Publicación</label>
+                    <Select
+                      value={propertyDetails.status}
+                      onChange={(val) => setPropertyDetails({...propertyDetails, status: val})}
+                      className="h-11 text-xs"
+                      options={[
+                        { value: "AVAILABLE", label: "🟢 Disponible (Activa)" },
+                        { value: "RESERVED", label: "🟡 Reservada" },
+                        { value: "SOLD", label: "🔴 Vendida" },
+                        { value: "RENTED", label: "🔵 Alquilada" },
+                        { value: "INACTIVE", label: "⚪ Inactiva" },
+                      ]}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Tipo de Inmueble */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Tipo de Inmueble</label>
+                    <Select
+                      value={propertyDetails.type}
+                      onChange={(val) => setPropertyDetails({...propertyDetails, type: val})}
+                      className="h-11 text-sm"
+                      options={[
+                        { value: "HOUSE", label: "Casa" },
+                        { value: "APARTMENT", label: "Departamento" },
+                        { value: "LAND", label: "Terreno / Lote" },
+                        { value: "COMMERCIAL", label: "Local Comercial" },
+                        { value: "OFFICE", label: "Oficina" },
+                      ]}
+                    />
+                  </div>
+
+                  {/* Tipo de Operación */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Tipo de Operación</label>
+                    <Select
+                      value={propertyDetails.operation}
+                      onChange={(val) => setPropertyDetails({...propertyDetails, operation: val})}
+                      className="h-11 text-sm"
+                      options={[
+                        { value: "SALE", label: "Venta" },
+                        { value: "RENT", label: "Alquiler" },
+                        { value: "TEMP_RENT", label: "Alq. Temporario" },
+                      ]}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {/* Dormitorios */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Dormitorios</label>
+                    <Input
+                      type="number"
+                      value={propertyDetails.bedrooms ?? 0}
+                      onChange={(e) => setPropertyDetails({...propertyDetails, bedrooms: parseInt(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                  </div>
+                  {/* Baños */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Baños</label>
+                    <Input
+                      type="number"
+                      value={propertyDetails.bathrooms ?? 0}
+                      onChange={(e) => setPropertyDetails({...propertyDetails, bathrooms: parseInt(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                  </div>
+                  {/* M2 Totales */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">M² Totales</label>
+                    <Input
+                      type="number"
+                      value={propertyDetails.totalArea ?? 0}
+                      onChange={(e) => setPropertyDetails({...propertyDetails, totalArea: parseFloat(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                  </div>
+                  {/* M2 Cubiertos */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">M² Cubiertos</label>
+                    <Input
+                      type="number"
+                      value={propertyDetails.coveredArea ?? 0}
+                      onChange={(e) => setPropertyDetails({...propertyDetails, coveredArea: parseFloat(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Dirección */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Dirección</label>
+                    <Input
+                      value={propertyDetails.address || ""}
+                      onChange={(e) => setPropertyDetails({...propertyDetails, address: e.target.value})}
+                      placeholder="Ej. Florida 400"
+                    />
+                  </div>
+                  {/* Barrio */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Barrio</label>
+                    <Input
+                      value={propertyDetails.barrio || ""}
+                      onChange={(e) => setPropertyDetails({...propertyDetails, barrio: e.target.value})}
+                      placeholder="Ej. Centro"
+                    />
+                  </div>
+                  {/* Ciudad */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600">Ciudad</label>
+                    <div className="h-11 flex items-center bg-slate-100 border border-slate-200 rounded-xl text-sm px-3.5 text-slate-500 font-medium select-none">
+                      Pico Truncado
+                    </div>
+                  </div>
+                </div>
+
+                {/* Descripción descriptiva */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Descripción de la Publicación</label>
+                  <textarea
+                    rows={5}
+                    value={propertyDetails.description || ""}
+                    onChange={(e) => setPropertyDetails({...propertyDetails, description: e.target.value})}
+                    placeholder="Escribe una descripción comercial atractiva para el portal inmobiliario..."
+                    className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a365d] text-slate-800 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-slate-100">
+                <Button type="submit" className="bg-[#1a365d] hover:bg-[#2c5282] rounded-xl flex items-center gap-2 h-11 px-6 font-semibold text-sm cursor-pointer shadow-md shadow-[#1a365d]/10">
+                  <Save size={18} />
+                  Guardar Publicación
+                </Button>
+              </div>
+            </div>
+          </form>
+        )}
+
         {/* PESTAÑA: CONTRATO Y CLIENTE */}
         {activeTab === "contract" && (
           <form onSubmit={handleSaveContract} className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
@@ -306,20 +738,18 @@ export default function AdminPropertyDetailPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha de Inicio</label>
-                <Input 
-                  type="date"
+                <DatePicker 
                   value={contract.startDate} 
-                  onChange={(e) => setContract({...contract, startDate: e.target.value})}
+                  onChange={(val) => setContract({...contract, startDate: val})}
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha de Vencimiento</label>
-                <Input 
-                  type="date"
+                <DatePicker 
                   value={contract.endDate} 
-                  onChange={(e) => setContract({...contract, endDate: e.target.value})}
+                  onChange={(val) => setContract({...contract, endDate: val})}
                   required
                 />
               </div>
@@ -369,10 +799,9 @@ export default function AdminPropertyDetailPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha del Archivo</label>
-                  <Input 
-                    type="date" 
+                  <DatePicker 
                     value={newFileDate} 
-                    onChange={(e) => setNewFileDate(e.target.value)}
+                    onChange={(val) => setNewFileDate(val)}
                     required 
                   />
                 </div>
@@ -510,10 +939,9 @@ export default function AdminPropertyDetailPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
-                  <Input 
-                    type="date" 
+                  <DatePicker 
                     value={newEvent.date} 
-                    onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                    onChange={(val) => setNewEvent({...newEvent, date: val})}
                     required 
                   />
                 </div>

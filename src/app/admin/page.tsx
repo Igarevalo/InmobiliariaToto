@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { 
   Home, Users, DollarSign, ArrowUpRight, MessageSquare, 
-  AlertTriangle, Calendar, FileText, CheckCircle2 
+  AlertTriangle, Calendar, FileText, CheckCircle2, ClipboardList 
 } from "lucide-react";
 import Link from "next/link";
+import { useAdminStore } from "@/stores/adminStore";
 
 interface AlertItem {
   id: string;
-  type: "CONTRACT_EXPIRING" | "UNPAID_INVOICE" | "PENDING_RENT";
+  type: "CONTRACT_EXPIRING" | "UNPAID_INVOICE" | "PENDING_RENT" | "ASSIGNED_TASK";
   title: string;
   detail: string;
   slug: string;
@@ -17,13 +18,24 @@ interface AlertItem {
 }
 
 export default function AdminDashboard() {
+  const { name } = useAdminStore();
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
 
+  const isMarta = name ? name.toLowerCase().includes("marta") : false;
+  const currentUsername = isMarta ? "marta" : "admin";
+
+  const [stats, setStats] = useState({
+    activeProperties: 3,
+    newLeads: 1,
+    totalClients: 4,
+    monthlySalesUSD: 350000,
+  });
+
   const STATS = [
-    { label: "Propiedades Activas", value: "42", icon: Home, trend: "+3 este mes" },
-    { label: "Leads Nuevos", value: "18", icon: MessageSquare, trend: "+5 esta semana" },
-    { label: "Clientes (CRM)", value: "156", icon: Users, trend: "+12 este mes" },
-    { label: "Ventas Mensuales", value: "$450K", icon: DollarSign, trend: "+15% vs mes anterior" },
+    { label: "Propiedades Activas", value: `${stats.activeProperties}`, icon: Home, trend: "3 en catálogo" },
+    { label: "Leads Nuevos", value: `${stats.newLeads}`, icon: MessageSquare, trend: "Prospectos activos" },
+    { label: "Clientes (CRM)", value: `${stats.totalClients}`, icon: Users, trend: "En base de datos" },
+    { label: "Ventas Totales (USD)", value: `$${stats.monthlySalesUSD >= 1000 ? (stats.monthlySalesUSD / 1000).toFixed(0) + 'K' : stats.monthlySalesUSD}`, icon: DollarSign, trend: "Operaciones Venta" },
   ];
 
   const RECENT_LEADS = [
@@ -32,111 +44,158 @@ export default function AdminDashboard() {
     { id: 3, name: "Sofía Etcheverry", property: "Oficina Microcentro", date: "Ayer", status: "Nuevo" },
   ];
 
-  // --- Cargar y calcular alertas desde localStorage ---
+  // --- Cargar y calcular alertas y métricas reales ---
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    const fetchUserAlerts = async () => {
       const computedAlerts: AlertItem[] = [];
 
-      // Mocks iniciales si no hay nada en localStorage para mostrar la capacidad
-      let hasCustomData = false;
+      // 0. Calcular métricas reales del sistema
+      if (typeof window !== "undefined") {
+        let clientCount = 4;
+        let leadsCount = 1;
+        const storedClientKeys = Object.keys(localStorage).filter(k => k.startsWith("client_profile_"));
+        if (storedClientKeys.length > 0) {
+          clientCount = Math.max(4, storedClientKeys.length);
+        }
 
-      // 1. Escanear contratos por vencer
-      const keys = Object.keys(localStorage);
-      keys.forEach((key) => {
-        if (key.startsWith("contract_")) {
-          hasCustomData = true;
-          const slug = key.replace("contract_", "");
+        let salesTotalUSD = 350000;
+        const storedTrx = localStorage.getItem("financial_transactions");
+        if (storedTrx) {
           try {
-            const contract = JSON.parse(localStorage.getItem(key) || "");
-            if (contract && contract.endDate) {
-              const diffTime = new Date(contract.endDate).getTime() - new Date().getTime();
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-              
-              if (diffDays <= 60 && diffDays > 0) {
-                computedAlerts.push({
-                  id: `exp-${slug}`,
-                  type: "CONTRACT_EXPIRING",
-                  title: `Contrato por vencer en ${diffDays} días`,
-                  detail: `Propiedad: ${slug.split("-").join(" ")} (Inquilino: ${contract.clientName})`,
-                  slug,
-                  severity: diffDays <= 15 ? "high" : "medium"
-                });
-              } else if (diffDays <= 0) {
-                computedAlerts.push({
-                  id: `exp-${slug}`,
-                  type: "CONTRACT_EXPIRING",
-                  title: `Contrato vencido`,
-                  detail: `Propiedad: ${slug.split("-").join(" ")} (Venció el: ${contract.endDate})`,
-                  slug,
-                  severity: "high"
-                });
-              }
+            const trxs = JSON.parse(storedTrx);
+            const sales = trxs.filter((t: any) => t.type === "VENTA" && t.status === "COMPLETED" && t.currency === "USD");
+            if (sales.length > 0) {
+              salesTotalUSD = sales.reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
             }
-          } catch (e) {
-            console.error(e);
-          }
+          } catch (e) {}
         }
 
-        // 2. Escanear facturas impagas
-        if (key.startsWith("files_")) {
-          hasCustomData = true;
-          const slug = key.replace("files_", "");
-          try {
-            const files = JSON.parse(localStorage.getItem(key) || "[]");
-            files.forEach((file: any) => {
-              if (file.status === "IMPAGO") {
-                computedAlerts.push({
-                  id: `invoice-${file.id}`,
-                  type: "UNPAID_INVOICE",
-                  title: `Factura / Expensa pendiente de pago`,
-                  detail: `${file.name} (Registrado el ${file.date})`,
-                  slug,
-                  severity: "medium"
-                });
-              }
-            });
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      });
-
-      // Si no hay datos en localStorage, cargamos alertas mock realistas
-      if (!hasCustomData) {
-        computedAlerts.push({
-          id: "mock-1",
-          type: "CONTRACT_EXPIRING",
-          title: "Contrato por vencer en 34 días",
-          detail: "Casa Moderna con Jardín en Palermo (Inquilino: María Gómez)",
-          slug: "casa-moderna-en-palermo",
-          severity: "medium"
-        });
-        computedAlerts.push({
-          id: "mock-2",
-          type: "UNPAID_INVOICE",
-          title: "Factura de Expensas pendiente de pago",
-          detail: "Boleta_Expensas_Julio.pdf (Casa Palermo)",
-          slug: "casa-moderna-en-palermo",
-          severity: "medium"
-        });
-        computedAlerts.push({
-          id: "mock-3",
-          type: "PENDING_RENT",
-          title: "Cobro de Alquiler del mes pendiente",
-          detail: "Lujoso Departamento con Vista al Río Puerto Madero",
-          slug: "departamento-puerto-madero",
-          severity: "high"
+        setStats({
+          activeProperties: 3,
+          newLeads: leadsCount,
+          totalClients: clientCount,
+          monthlySalesUSD: salesTotalUSD,
         });
       }
 
+      // 1. Cargar Tareas Pendientes asignadas al Administrador actual
+      try {
+        const res = await fetch("/api/admin/tasks");
+        if (res.ok) {
+          const tasks = await res.json();
+          const pendingUserTasks = tasks.filter(
+            (t: any) => t.assignedTo === currentUsername && t.status === "PENDING"
+          );
+
+          pendingUserTasks.forEach((t: any) => {
+            computedAlerts.push({
+              id: `task-${t.id}`,
+              type: "ASSIGNED_TASK",
+              title: `Tarea Asignada Pendiente: ${t.title}`,
+              detail: `Prioridad: ${t.priority === 'HIGH' ? 'Alta' : t.priority === 'MEDIUM' ? 'Media' : 'Baja'} (Asignada a ti)`,
+              slug: "/admin/tareas",
+              severity: t.priority === "HIGH" ? "high" : "medium",
+            });
+          });
+        }
+      } catch (err) {
+        console.error("Error al cargar tareas para alertas:", err);
+      }
+
+      // 2. Escanear contratos y facturas en localStorage
+      if (typeof window !== "undefined") {
+        let hasCustomData = false;
+        const keys = Object.keys(localStorage);
+        keys.forEach((key) => {
+          if (key.startsWith("contract_")) {
+            hasCustomData = true;
+            const slug = key.replace("contract_", "");
+            try {
+              const contract = JSON.parse(localStorage.getItem(key) || "");
+              if (contract && contract.endDate) {
+                const diffTime = new Date(contract.endDate).getTime() - new Date().getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays <= 60 && diffDays > 0) {
+                  computedAlerts.push({
+                    id: `exp-${slug}`,
+                    type: "CONTRACT_EXPIRING",
+                    title: `Contrato por vencer en ${diffDays} días`,
+                    detail: `Propiedad: ${slug.split("-").join(" ")} (Inquilino: ${contract.clientName})`,
+                    slug: `/admin/propiedades/${slug}`,
+                    severity: diffDays <= 15 ? "high" : "medium"
+                  });
+                } else if (diffDays <= 0) {
+                  computedAlerts.push({
+                    id: `exp-${slug}`,
+                    type: "CONTRACT_EXPIRING",
+                    title: `Contrato vencido`,
+                    detail: `Propiedad: ${slug.split("-").join(" ")} (Venció el: ${contract.endDate})`,
+                    slug: `/admin/propiedades/${slug}`,
+                    severity: "high"
+                  });
+                }
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
+          if (key.startsWith("files_")) {
+            hasCustomData = true;
+            const slug = key.replace("files_", "");
+            try {
+              const files = JSON.parse(localStorage.getItem(key) || "[]");
+              files.forEach((file: any) => {
+                if (file.status === "IMPAGO") {
+                  computedAlerts.push({
+                    id: `invoice-${file.id}`,
+                    type: "UNPAID_INVOICE",
+                    title: `Factura / Expensa pendiente de pago`,
+                    detail: `${file.name} (Registrado el ${file.date})`,
+                    slug: `/admin/propiedades/${slug}`,
+                    severity: "medium"
+                  });
+                }
+              });
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        });
+
+        if (!hasCustomData && computedAlerts.length === 0) {
+          computedAlerts.push({
+            id: "mock-1",
+            type: "CONTRACT_EXPIRING",
+            title: "Contrato por vencer en 34 días",
+            detail: "Casa Moderna con Jardín en Palermo (Inquilino: María Gómez)",
+            slug: "/admin/propiedades/casa-moderna-en-palermo",
+            severity: "medium"
+          });
+          computedAlerts.push({
+            id: "mock-2",
+            type: "UNPAID_INVOICE",
+            title: "Factura de Expensas pendiente de pago",
+            detail: "Boleta_Expensas_Julio.pdf (Casa Palermo)",
+            slug: "/admin/propiedades/casa-moderna-en-palermo",
+            severity: "medium"
+          });
+        }
+      }
+
       setAlerts(computedAlerts);
-    }
-  }, []);
+    };
+
+    fetchUserAlerts();
+  }, [name]);
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 font-display mb-2">Bienvenido de nuevo, Juan</h1>
+        <h1 className="text-2xl font-bold text-slate-800 font-display mb-2">
+          Bienvenido de nuevo, {name || (isMarta ? "Marta" : "Toto")}
+        </h1>
         <p className="text-slate-500">Aquí tienes un resumen del estado de tu inmobiliaria hoy.</p>
       </div>
 
@@ -258,7 +317,7 @@ export default function AdminDashboard() {
               </div>
             </Link>
             
-            <Link href="/admin/clientes/nuevo" className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#2b6cb0] hover:bg-slate-50 transition-colors group">
+            <Link href="/admin/clientes" className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#2b6cb0] hover:bg-slate-50 transition-colors group">
               <div className="w-10 h-10 rounded-lg bg-[#2b6cb0]/10 text-[#2b6cb0] flex items-center justify-center group-hover:bg-[#2b6cb0] group-hover:text-white transition-colors">
                 <Users size={20} />
               </div>
@@ -268,13 +327,23 @@ export default function AdminDashboard() {
               </div>
             </Link>
 
-            <Link href="/admin/finanzas/nueva-operacion" className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#38a169] hover:bg-slate-50 transition-colors group">
+            <Link href="/admin/finanzas" className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#38a169] hover:bg-slate-50 transition-colors group">
               <div className="w-10 h-10 rounded-lg bg-[#38a169]/10 text-[#38a169] flex items-center justify-center group-hover:bg-[#38a169] group-hover:text-white transition-colors">
                 <DollarSign size={20} />
               </div>
               <div>
                 <p className="font-medium text-slate-800">Registrar Operación</p>
                 <p className="text-xs text-slate-500">Venta o Alquiler concretado</p>
+              </div>
+            </Link>
+
+            <Link href="/admin/tareas" className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#d69e2e] hover:bg-slate-50 transition-colors group">
+              <div className="w-10 h-10 rounded-lg bg-[#d69e2e]/10 text-[#d69e2e] flex items-center justify-center group-hover:bg-[#d69e2e] group-hover:text-white transition-colors">
+                <ClipboardList size={20} />
+              </div>
+              <div>
+                <p className="font-medium text-slate-800">Nueva Tarea Interna</p>
+                <p className="text-xs text-slate-500">Asignar a Marta o Toto</p>
               </div>
             </Link>
           </div>

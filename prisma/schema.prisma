@@ -191,20 +191,65 @@ model PropertyAmenity {
   @@id([propertyId, amenityId])
 }
 
+enum InquiryStatus {
+  PENDING
+  ANSWERED
+  FOLLOWING_UP
+}
+
 model Inquiry {
-  id         String   @id @default(uuid())
-  message    String   @db.Text
+  id            String        @id @default(uuid())
+  message       String        @db.Text
+  status        InquiryStatus @default(PENDING)
+  isPublic      Boolean       @default(false)
   
-  clientId   String?
-  client     Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  // Datos del visitante (si no está registrado como Client)
+  guestName     String?
+  guestEmail    String?
+  guestPhone    String?
   
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  // Propiedad referenciada
+  propertyTitle String?
+  propertyUrl   String?
   
-  createdAt  DateTime @default(now())
+  // Respuesta
+  answeredAt    DateTime?
+  answeredBy    String?       // nombre del agente que respondió
+  
+  clientId      String?
+  client        Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  propertyId    String
+  property      Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  messages      InquiryMessage[]
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   
   @@index([propertyId])
   @@index([clientId])
+  @@index([status])
+}
+
+enum InquiryMessageSender {
+  CLIENT
+  AGENT
+}
+
+model InquiryMessage {
+  id         String               @id @default(uuid())
+  content    String               @db.Text
+  sender     InquiryMessageSender
+  senderName String?
+  isPublic   Boolean              @default(false)
+  
+  inquiryId  String
+  inquiry    Inquiry              @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime             @default(now())
+  
+  @@index([inquiryId])
 }
 
 enum FinancialRecordType {

@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyContactForm } from "@/components/property/PropertyContactForm";
+import { PropertyQA } from "@/components/property/PropertyQA";
 import { MapPin, BedDouble, Bath, Square, Calendar, Car, Check } from "lucide-react";
 import { notFound } from "next/navigation";
 
@@ -168,12 +169,19 @@ export default async function PropertyPage(
                 </ul>
               </div>
 
+              {/* Q&A Pública */}
+              <PropertyQA propertyId={property.slug} />
+
             </div>
           </div>
 
           {/* Sidebar (Derecha) */}
           <div className="lg:col-span-1">
-            <PropertyContactForm propertyId={property.slug} agentName={property.agent.name} />
+            <PropertyContactForm
+              propertyId={property.slug}
+              agentName={property.agent.name}
+              propertyTitle={property.title}
+            />
           </div>
 
         </div>

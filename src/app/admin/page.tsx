@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { 
   Home, Users, DollarSign, ArrowUpRight, MessageSquare, 
-  AlertTriangle, Calendar, FileText, CheckCircle2, ClipboardList 
+  AlertTriangle, Calendar, FileText, CheckCircle2, ClipboardList,
+  MessageCircleQuestion, Clock, ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { useAdminStore } from "@/stores/adminStore";
@@ -20,6 +21,8 @@ interface AlertItem {
 export default function AdminDashboard() {
   const { name } = useAdminStore();
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [recentConsultas, setRecentConsultas] = useState<any[]>([]);
+  const [consultasFilter, setConsultasFilter] = useState<"ALL" | "PENDING" | "ANSWERED">("ALL");
 
   const isMarta = name ? name.toLowerCase().includes("marta") : false;
   const currentUsername = isMarta ? "marta" : "admin";
@@ -100,6 +103,28 @@ export default function AdminDashboard() {
         }
       } catch (err) {
         console.error("Error al cargar tareas para alertas:", err);
+      }
+
+      // 1b. Cargar consultas recientes
+      try {
+        const resC = await fetch("/api/admin/consultas");
+        if (resC.ok) {
+          const allConsultas = await resC.json();
+          setRecentConsultas(allConsultas.slice(0, 5));
+          const pendingCount = allConsultas.filter((c: any) => c.status === "PENDING").length;
+          if (pendingCount > 0) {
+            computedAlerts.push({
+              id: "consultas-pending",
+              type: "ASSIGNED_TASK",
+              title: `${pendingCount} consulta${pendingCount > 1 ? "s" : ""} sin responder`,
+              detail: "Preguntas de clientes esperando respuesta desde la web",
+              slug: "/admin/consultas",
+              severity: pendingCount >= 3 ? "high" : "medium",
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error al cargar consultas:", err);
       }
 
       // 2. Escanear contratos y facturas en localStorage
@@ -260,6 +285,85 @@ export default function AdminDashboard() {
                 </Link>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Consultas Recientes */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <MessageCircleQuestion className="text-[#1a365d]" size={22} />
+            <h3 className="font-bold text-lg text-slate-800">Consultas Recientes</h3>
+            {recentConsultas.filter(c => c.status === "PENDING").length > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full bg-red-500 text-white text-xs font-bold animate-pulse">
+                {recentConsultas.filter(c => c.status === "PENDING").length}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {(["ALL", "PENDING", "ANSWERED"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setConsultasFilter(f)}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                  consultasFilter === f
+                    ? "bg-[#1a365d] text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {f === "ALL" ? "Todas" : f === "PENDING" ? "Pendientes" : "Respondidas"}
+              </button>
+            ))}
+            <Link href="/admin/consultas" className="text-sm text-[#2b6cb0] hover:underline font-medium ml-2 flex items-center gap-1">
+              Ver todas <ChevronRight size={14} />
+            </Link>
+          </div>
+        </div>
+
+        {recentConsultas.length === 0 ? (
+          <div className="flex items-center gap-2 text-slate-400 text-sm p-8 justify-center">
+            <MessageCircleQuestion size={18} className="text-slate-200" />
+            <span>No hay consultas registradas aún.</span>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-50">
+            {recentConsultas
+              .filter(c => consultasFilter === "ALL" || c.status === consultasFilter)
+              .slice(0, 5)
+              .map((c) => {
+                const isPending = c.status === "PENDING";
+                return (
+                  <div key={c.id} className={`flex items-center justify-between px-6 py-4 gap-4 hover:bg-slate-50/70 transition-colors ${isPending ? "bg-amber-50/20" : ""}`}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${isPending ? "bg-amber-400 animate-pulse" : "bg-green-400"}`} />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800 text-sm truncate">{c.guestName}</p>
+                        <p className="text-xs text-slate-500 truncate">{c.propertyTitle || c.propertyId}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-xs text-slate-600 truncate max-w-[180px]">{c.message}</p>
+                        <p className="text-[11px] text-slate-400">
+                          {new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(c.createdAt))}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/admin/consultas/${c.id}`}
+                        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                          isPending
+                            ? "bg-[#1a365d] text-white hover:bg-[#2b4a7a]"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {isPending ? "Responder" : "Ver"}
+                        <ChevronRight size={12} />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         )}
       </div>

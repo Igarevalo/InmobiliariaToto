@@ -2,20 +2,38 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building, LayoutDashboard, Home, Users, MessageSquare, LogOut, Settings, DollarSign, Calendar, ClipboardList } from "lucide-react";
+import { Building, LayoutDashboard, Home, Users, MessageCircleQuestion, LogOut, Settings, DollarSign, Calendar, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const [pendingConsultas, setPendingConsultas] = useState(0);
+
+  useEffect(() => {
+    async function fetchPending() {
+      try {
+        const res = await fetch("/api/admin/consultas?status=PENDING");
+        if (res.ok) {
+          const data = await res.json();
+          setPendingConsultas(data.length);
+        }
+      } catch { /* silently ignore */ }
+    }
+    fetchPending();
+    // Refrescar cada 60 segundos
+    const interval = setInterval(fetchPending, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const NAV_ITEMS = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Propiedades", href: "/admin/propiedades", icon: Home },
-    { name: "Clientes (CRM)", href: "/admin/clientes", icon: Users },
-    { name: "Leads", href: "/admin/leads", icon: MessageSquare },
-    { name: "Tareas", href: "/admin/tareas", icon: ClipboardList },
-    { name: "Finanzas", href: "/admin/finanzas", icon: DollarSign },
-    { name: "Calendario", href: "/admin/calendario", icon: Calendar },
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard, badge: 0 },
+    { name: "Propiedades", href: "/admin/propiedades", icon: Home, badge: 0 },
+    { name: "Clientes (CRM)", href: "/admin/clientes", icon: Users, badge: 0 },
+    { name: "Consultas", href: "/admin/consultas", icon: MessageCircleQuestion, badge: pendingConsultas },
+    { name: "Tareas", href: "/admin/tareas", icon: ClipboardList, badge: 0 },
+    { name: "Finanzas", href: "/admin/finanzas", icon: DollarSign, badge: 0 },
+    { name: "Calendario", href: "/admin/calendario", icon: Calendar, badge: 0 },
   ];
 
   const handleLogout = async () => {
@@ -57,7 +75,12 @@ export function AdminSidebar() {
               )}
             >
               <item.icon size={18} className={isActive ? "text-[#d69e2e]" : "text-slate-400"} />
-              {item.name}
+              <span className="flex-1">{item.name}</span>
+              {item.badge > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold animate-pulse">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}

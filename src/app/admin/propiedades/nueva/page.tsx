@@ -33,6 +33,7 @@ export default function NuevaPropiedadPage() {
   const [mediaFiles, setMediaFiles] = useState<{ file: File; url: string; type: "image" | "video" }[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -71,6 +72,27 @@ export default function NuevaPropiedadPage() {
 
     if (validFiles.length > 0) {
       setMediaFiles((prev) => [...prev, ...validFiles]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileChange(e.dataTransfer.files);
     }
   };
 
@@ -290,18 +312,34 @@ export default function NuevaPropiedadPage() {
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="text-lg font-bold text-[#1a365d] mb-6 border-b border-slate-100 pb-2">Imágenes y Videos</h3>
           
-          <label className="border-2 border-dashed border-slate-300 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100/50 hover:border-[#1a365d]/50 transition-all cursor-pointer text-center group">
+          <label 
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all cursor-pointer text-center group ${
+              isDragging 
+                ? "border-[#1a365d] bg-blue-50/60 scale-[1.01]" 
+                : "border-slate-300 bg-slate-50 hover:bg-slate-100/50 hover:border-[#1a365d]/50"
+            }`}
+          >
             <input 
               type="file" 
               multiple 
               accept="image/*,video/mp4" 
               className="hidden" 
-              onChange={(e) => handleFileChange(e.target.files)} 
+              onChange={(e) => {
+                handleFileChange(e.target.files);
+                e.target.value = ""; // Reset input so same file can be re-added if removed
+              }} 
             />
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#2b6cb0] shadow-sm mb-4 group-hover:scale-105 transition-transform duration-300">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-[#2b6cb0] shadow-sm mb-4 transition-transform duration-300 ${
+              isDragging ? "bg-white scale-110" : "bg-white group-hover:scale-105"
+            }`}>
               <UploadCloud size={26} />
             </div>
-            <p className="font-semibold text-slate-800 text-sm mb-1">Haz clic para subir imágenes o arrástralas aquí</p>
+            <p className="font-semibold text-slate-800 text-sm mb-1">
+              {isDragging ? "Suelta las imágenes o videos aquí" : "Haz clic para subir imágenes o arrástralas aquí"}
+            </p>
             <p className="text-xs text-slate-500">Formatos soportados: Imágenes (JPG, PNG, WEBP) y Videos (MP4) (Máx. 20MB por archivo)</p>
           </label>
 
